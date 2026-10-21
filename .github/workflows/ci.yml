@@ -25,7 +25,7 @@ jobs:
     - name: Install Rust (1.88 w/ clippy)
       uses: dtolnay/rust-toolchain@1.88
       with:
-          components: clippy
+          components: clippy, rustfmt
     - name: Cache cargo registry
       uses: actions/cache@v3
       with:

@@ -10,7 +10,7 @@ use crate::compress::Format;
 #[derive(Debug, Parser)]
 #[command(name = "cargo", bin_name = "cargo")]
 enum Cargo {
-    Tarball(TarballArgs),
+    Tar(TarballArgs),
 }
 
 #[derive(Debug, Parser)]
@@ -111,7 +111,7 @@ impl TarballArgs {
         let argv: Vec<OsString> = argv.into_iter().collect();
 
         if argv.get(1).is_some_and(|arg| arg == "tar") {
-            let Cargo::Tarball(args) = Cargo::parse_from(argv);
+            let Cargo::Tar(args) = Cargo::parse_from(argv);
             args
         } else {
             Parser::parse_from(argv)
