@@ -1,7 +1,7 @@
 //! Parse `cargo metadata` output and run `cargo build` as needed.
 use std::ffi::OsString;
 use std::io::{BufRead, BufReader};
-use std::path::{Path, PathBuf};
+use std::path::{MAIN_SEPARATOR_STR, Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::{Context, Result, anyhow, bail};
@@ -324,6 +324,7 @@ fn names(packages: &[Package]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::MAIN_SEPARATOR;
 
     use clap::Parser;
 
@@ -394,12 +395,12 @@ mod tests {
             "x86_64-unknown-linux-gnu",
         ]);
         let package = multibin();
-        let message = package
-            .prebuilt(&args, &["tool"], Path::new("/nonexistent"))
-            .unwrap_err()
-            .to_string();
+        let target_dir = PathBuf::from(MAIN_SEPARATOR_STR).join("nonexistent");
+        let message = package.prebuilt(&args, &["tool"], &target_dir).unwrap_err().to_string();
 
-        assert!(message.contains("x86_64-unknown-linux-gnu/release/tool"), "{message}");
+        let expected =
+            format!("x86_64-unknown-linux-gnu{MAIN_SEPARATOR}release{MAIN_SEPARATOR}tool");
+        assert!(message.contains(&expected), "{message}");
     }
 
     #[test]
