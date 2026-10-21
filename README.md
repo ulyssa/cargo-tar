@@ -12,7 +12,7 @@ This is a [Cargo] helper command which can automatically create release
 tarballs from your Cargo projects, and provides an interface similar to
 [cargo-deb] and [cargo-generate-rpm].
 
-Using this command, you can currently build `.tar` and `.tar.gz` release
+Using this command, you can build `.tar`, `.tar.gz`, and `.tar.bz2` release
 archives from a Cargo project, by declaring the layout in your `Cargo.toml`.
 
 _You may want to [see this page as it was when the latest version was published][crates-io-cargo-tar]._
