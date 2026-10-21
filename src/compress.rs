@@ -15,6 +15,7 @@ pub enum Format {
     Tar,
     #[default]
     TarGz,
+    TarBz2,
 }
 
 impl Format {
@@ -23,6 +24,7 @@ impl Format {
         match self {
             Format::Tar => "tar",
             Format::TarGz => "tar.gz",
+            Format::TarBz2 => "tar.bz2",
         }
     }
 }
@@ -34,10 +36,7 @@ impl FromStr for Format {
         let format = match name {
             "tar" => Format::Tar,
             "tar.gz" | "tgz" | "gz" | "gzip" => Format::TarGz,
-            "tar.bz2" | "tbz2" | "tbz" | "bz2" | "bzip2" => {
-                // XXX: implement at some point:
-                bail!("archive format `{name}` is not currently supported");
-            },
+            "tar.bz2" | "tbz2" | "tbz" | "bz2" | "bzip2" => Format::TarBz2,
             "tar.xz" | "txz" | "xz" | "lzma" => {
                 // XXX: implement at some point:
                 bail!("archive format `{name}` is not currently supported");
@@ -47,7 +46,7 @@ impl FromStr for Format {
                 bail!("archive format `{name}` is not currently supported");
             },
             _ => {
-                bail!("unknown archive format `{name}` (expected one of: tar, tar.gz)");
+                bail!("unknown archive format `{name}` (expected one of: tar, tar.gz, tar.bz2)");
             },
         };
 
@@ -106,6 +105,7 @@ pub fn write_archive(tar: &Path, format: Format, level: u32, output: &Path) -> R
 enum Encoder {
     Plain(File),
     Gzip(flate2::write::GzEncoder<File>),
+    Bzip2(bzip2::write::BzEncoder<File>),
 }
 
 impl Encoder {
@@ -115,6 +115,10 @@ impl Encoder {
 
             Format::TarGz => {
                 Encoder::Gzip(flate2::write::GzEncoder::new(file, flate2::Compression::new(level)))
+            },
+
+            Format::TarBz2 => {
+                Encoder::Bzip2(bzip2::write::BzEncoder::new(file, bzip2::Compression::new(level)))
             },
         };
 
@@ -130,6 +134,7 @@ impl Encoder {
                 Ok(file)
             },
             Encoder::Gzip(encoder) => encoder.finish(),
+            Encoder::Bzip2(encoder) => encoder.finish(),
         }
     }
 }
@@ -139,6 +144,7 @@ impl Write for Encoder {
         match self {
             Encoder::Plain(file) => file.write(buf),
             Encoder::Gzip(encoder) => encoder.write(buf),
+            Encoder::Bzip2(encoder) => encoder.write(buf),
         }
     }
 
@@ -146,6 +152,7 @@ impl Write for Encoder {
         match self {
             Encoder::Plain(file) => file.flush(),
             Encoder::Gzip(encoder) => encoder.flush(),
+            Encoder::Bzip2(encoder) => encoder.flush(),
         }
     }
 }
@@ -160,11 +167,13 @@ mod tests {
             ("tar", Format::Tar),
             ("tgz", Format::TarGz),
             ("tar.gz", Format::TarGz),
+            ("bzip2", Format::TarBz2),
+            ("tar.bz2", Format::TarBz2),
         ] {
             assert_eq!(Format::from_str(spelling).unwrap(), expected, "{spelling}");
         }
 
-        for format in [Format::Tar, Format::TarGz] {
+        for format in [Format::Tar, Format::TarGz, Format::TarBz2] {
             assert_eq!(Format::from_str(format.extension()).unwrap(), format);
         }
     }

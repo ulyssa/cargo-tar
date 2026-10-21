@@ -1,7 +1,7 @@
 //! Parse `cargo metadata` output and run `cargo build` as needed.
 use std::ffi::OsString;
 use std::io::{BufRead, BufReader};
-use std::path::{MAIN_SEPARATOR_STR, Path, PathBuf};
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use anyhow::{Context, Result, anyhow, bail};
@@ -324,7 +324,7 @@ fn names(packages: &[Package]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::MAIN_SEPARATOR;
+    use std::path::{MAIN_SEPARATOR, MAIN_SEPARATOR_STR};
 
     use clap::Parser;
 
