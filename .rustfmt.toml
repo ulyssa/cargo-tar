@@ -1,0 +1,7 @@
+max_width = 100
+fn_call_width = 88
+struct_lit_width = 50
+struct_variant_width = 50
+chain_width = 75
+match_block_trailing_comma = true
+newline_style = "Unix"
